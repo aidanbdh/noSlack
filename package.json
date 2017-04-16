@@ -1,0 +1,22 @@
+{
+  "name": "slack-without-slack",
+  "version": "1.0.0",
+  "description": "A slackbot for people who want a personal assistant through slack.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aidanbdh/slack-without-slack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aidanbdh/slack-without-slack/issues"
+  },
+  "homepage": "https://github.com/aidanbdh/slack-without-slack#readme",
+  "dependencies": {
+    "@slack/client": "^3.9.0"
+  }
+}
