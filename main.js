@@ -29,14 +29,14 @@ rtm.once(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
     rtm.sendMessage('Thanks! You can now @mention me (the bot) and the message will be sent to whoever you are trying to reach! Mention me and add "botInfo" if you want to edit this information at any time!', channel)
     //Mentions
     rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel }) {
-      if(text.indexOf(`${self}`) === -1 || text.indexOf('botInfo') === -1) return
+        if(text.indexOf(`<@${self}>`) === -1 || text.indexOf('botInfo') === -1) return
         rtm.sendMessage(`My contact info is ${contact}. If you wish to change it, reply 'Edit'.`, channel)
         rtm.once(RTM_EVENTS.MESSAGE, function({ user, text, channel }) {
           if(text.toLowerCase() !== 'edit') return
           if(user !== mainUser) {
             rtm.sendMessage(`Only the user that set up this bot can edit the contact information.`, channel)
           } else {
-            rtm.sendMessage('What would you like the new contact information to be?')
+            rtm.sendMessage('What would you like the new contact information to be?', channel)
             rtm.once(RTM_EVENTS.MESSAGE, function({ user, text, channel }) {
               if(user !== mainUser) return
               contact = text
