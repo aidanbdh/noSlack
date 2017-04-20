@@ -8,6 +8,7 @@ const rtm = new RtmClient(botToken, {
 })
 
 let contact
+let type
 let mainUser
 let self
 
@@ -26,24 +27,37 @@ rtm.once(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
   rtm.once(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
     if(channel !== mainChannel || user !== mainUser) return
     contact = text
-    rtm.sendMessage('Thanks! You can now @mention me (the bot) and the message will be sent to whoever you are trying to reach! Mention me and add "botInfo" if you want to edit this information at any time!', channel)
-    //Mentions
-    rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel }) {
-        if(text.indexOf(`<@${self}>`) === -1 || text.indexOf('botInfo') === -1) return
-        rtm.sendMessage(`My contact info is ${contact}. If you wish to change it, reply 'Edit'.`, channel)
-        rtm.once(RTM_EVENTS.MESSAGE, function({ user, text, channel }) {
-          if(text.toLowerCase() !== 'edit') return
-          if(user !== mainUser) {
-            rtm.sendMessage(`Only the user that set up this bot can edit the contact information.`, channel)
-          } else {
-            rtm.sendMessage('What would you like the new contact information to be?', channel)
-            rtm.once(RTM_EVENTS.MESSAGE, function({ user, text, channel }) {
-              if(user !== mainUser) return
-              contact = text
-              rtm.sendMessage('Thanks! You can now @mention me (the bot) and the message will be sent to whoever you are trying to reach! Mention me and add "botInfo" if you want to edit this information at any time!', channel)
-            })
-          }
+    rtm.sendMessage('Is this a PHONE or EMAIL?', channel)
+    rtm.once(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
+      if(channel !== mainChannel || user !== mainUser) return
+      if(text.toLowerCase().indexOf('phone') !== -1) { type = 'phone'
+    } else if (text.toLowerCase().indexOf('email') !== -1) { type = 'email'
+      } else return
+      rtm.sendMessage('Thanks! You can now @mention me (the bot) and the message will be sent to whoever you are trying to reach! Mention me and add "botInfo" if you want to edit this information at any time!', channel)
+      //Mentions
+      rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel }) {
+          if(text.indexOf(`<@${self}>`) === -1 || text.indexOf('botInfo') === -1) return
+          rtm.sendMessage(`My contact info is ${contact}. If you wish to change it, reply 'Edit'.`, channel)
+          rtm.once(RTM_EVENTS.MESSAGE, function({ user, text, channel }) {
+            if(text.toLowerCase() !== 'edit') return
+            if(user !== mainUser) {
+              rtm.sendMessage(`Only the user that set up this bot can edit the contact information.`, channel)
+            } else {
+              rtm.sendMessage('What would you like the new contact information to be?', channel)
+              rtm.once(RTM_EVENTS.MESSAGE, function({ user, text, channel }) {
+                if(user !== mainUser) return
+                contact = text
+                rtm.sendMessage('Is this a PHONE or EMAIL?', channel)
+                rtm.once(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
+                  if(channel !== mainChannel || user !== mainUser) return
+                  if(text.toLowerCase().indexOf('phone') !== -1) { type = 'phone'
+                  } else if (text.toLowerCase().indexOf('email') !== -1) { type = 'email'
+                  } else return
+                  rtm.sendMessage('Thanks! You can now @mention me (the bot) and the message will be sent to whoever you are trying to reach! Mention me and add "botInfo" if you want to edit this information at any time!', channel)              })
+              })
+            }
+          })
         })
-    })
+      })
   })
 })
