@@ -1,5 +1,6 @@
 const { RtmClient, CLIENT_EVENTS, MemoryDataStore, RTM_EVENTS } = require('@slack/client')
-const { botToken } = require('./secrets.js')
+const { botToken, twilioNumber, accountSid, authToken } = require('./secrets.js')
+const twilioClient = require('twilio')(accountSid, authToken)
 
 const rtm = new RtmClient(botToken, {
   logLevel: 'error',
@@ -19,6 +20,7 @@ const botData = {
   contact: {
     phone: 0,
     email: '',
+    type: null,
     unknown: null
   }
 }
@@ -71,11 +73,13 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
       case 2:
         if(text.indexOf('phone') !== -1) {
           botData.contact.phone = botData.contact.unknown
-          send(`I have the phone number ${botData.contact.phone} is this right? Reply "no" to retry`)
+          botData.contact.type = 'phone'
+          send(`I have the phone number ${botData.contact.phone} is this right? Reply "no" to retry.`)
           add()
         } else if (text.indexOf('email') !== -1) {
           botData.contact.email = botData.contact.unknown
-          send(`I have the email address ${botData.contact.email} is this right? Reply "no" to retry`)
+          botData.contact.type = 'email'
+          send(`I have the email address ${botData.contact.email} is this right? Reply "no" to retry.`)
           add()
         } else {
           botData.events = 0
@@ -91,14 +95,12 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
         botData.events = 0
         botData.contact.unknown = null
         if(text.indexOf('no') !== -1) {
-          botData.contact.phone = 0
-          botData.contact.email = ''
           send(`Okay. Message me at any time to retry.`)
           return;
         }
         botData.listening = true
         botData.populating = false
-        send(`Great! You can now send messages to me just by mentioning me! Send "edit" alone in this channel to change or add contact information or "info" alone to see my current information`)
+        send(`Great! You can now send messages to me just by mentioning me! Send "edit" alone in this channel to change or add contact information or "info" alone to see my current information.`)
         return;
       default:
         return;
@@ -111,13 +113,23 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
         send('Okay! Send me a message to get started!')
       }
       if(text === 'info') {
-        send(`Okay I have the following information. Phone Number : ${botData.contact.phone} and Email Address : ${botData.contact.email}`)
+        send(`Okay I have the following information. Phone Number : ${botData.contact.phone} and Email Address : ${botData.contact.email}, and I will contact through ${botData.contact.type}.`)
       }
     }
     if(text.toUpperCase().indexOf(`<@${botData.id}>`) === -1) return
-    send(`Oops I'm still in development!`)
+    if(botData.contact.type === 'phone') {
+      twilioClient.messages.create({
+        to: `+1${botData.contact.phone}`,
+        from: twilioNumber,
+        body: text.slice(botData.id.length + 4, text.length)
+      }, err => {
+        if(!err) return
+        send(`There was an error sending your message. Please reconfigure messaging settings.`)
+      })
+    } else {
+      send(`Email support coming soon!`)
+    }
   } else {
     return;
   }
-  if(text.toUpperCase().indexOf(`<@${botData.id}>`) === -1) return
 })
