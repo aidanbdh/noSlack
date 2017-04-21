@@ -1,2 +1,2 @@
-# slack-personal-assistant
-A slackbot for people who want a personal assistant through slack.
+# noSlack
+A slackbot for people who want to slack people who don't have slack.
