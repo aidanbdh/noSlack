@@ -23,6 +23,7 @@ const botData = {
     user: ''
   },
   contact: {
+    team: '',
     phone: 0,
     email: '',
     type: null,
@@ -53,9 +54,13 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
         if(text.toUpperCase().indexOf(`<@${botData.id}>`) === -1) return
         botData.admin.user = user
         botData.admin.channel = channel
+        send(`Hello! This is your admin channel, anytime you want to change my settings, just message me here! Send me the name of your team to get started!`)
+        return;
+      case 3:
+        botData.team = text
         botData.events = 0
         botData.initializing = false
-        send(`Hello! This is your admin channel, anytime you want to change my settings, just message me here! Send me a message any time to get started!`)
+        send(`Thanks! Send me a message when you are ready to configure contact information.`)
         return;
       default:
         return;
@@ -125,7 +130,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
       twilioClient.messages.create({
         to: `+1${botData.contact.phone}`,
         from: twilioNumber,
-        body: text.slice(botData.id.length + 4, text.length)
+        body: `${text.slice(botData.id.length + 4, text.length)} + Join the conversation at https://${botData.contact.team}.slack.com`
       }, err => {
         if(!err) return
         send(`There was an error sending your message. Please reconfigure messaging settings.`)
