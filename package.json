@@ -1,5 +1,5 @@
 {
-  "name": "slack-without-slack",
+  "name": "noslack",
   "version": "1.0.0",
   "description": "A slackbot for people who want a personal assistant through slack.",
   "main": "index.js",
@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/aidanbdh/slack-without-slack#readme",
   "dependencies": {
-    "@slack/client": "^3.9.0"
-  }
+    "@slack/client": "^3.9.0",
+    "sendgrid": "^5.0.0",
+    "twilio": "^2.11.1"
+  },
+  "devDependencies": {}
 }
