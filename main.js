@@ -1,6 +1,11 @@
 const { RtmClient, CLIENT_EVENTS, MemoryDataStore, RTM_EVENTS } = require('@slack/client')
-const { botToken, twilioNumber, accountSid, authToken } = require('./secrets.js')
+const { botToken, twilioNumber, accountSid, authToken, sendGridToken } = require('./secrets.js')
 const twilioClient = require('twilio')(accountSid, authToken)
+const { mail } = require('sendgrid');
+const { Email, Content, Mail } = mail
+
+const from = new Email('noslack@gmail.com')
+const sg = require('sendgrid')(sendGridToken)
 
 const rtm = new RtmClient(botToken, {
   logLevel: 'error',
@@ -62,7 +67,6 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
         send(`Please respond with a phone number or email address to set up contact information.`)
         add()
         return;
-      //Confirm info
       //Ask for contact type
       case 1:
         botData.contact.unknown = text
@@ -77,7 +81,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
           send(`I have the phone number ${botData.contact.phone} is this right? Reply "no" to retry.`)
           add()
         } else if (text.indexOf('email') !== -1) {
-          botData.contact.email = botData.contact.unknown
+          botData.contact.email = botData.contact.unknown.slice(8,botData.contact.unknown.length/2+3)
           botData.contact.type = 'email'
           send(`I have the email address ${botData.contact.email} is this right? Reply "no" to retry.`)
           add()
@@ -127,7 +131,19 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
         send(`There was an error sending your message. Please reconfigure messaging settings.`)
       })
     } else {
-      send(`Email support coming soon!`)
+      const to = new Email(`${botData.contact.email}`)
+      const subject = `New Slack Message.`;
+      const content = new Content('text/plain', text.slice(botData.id.length + 4, text.length));
+      const email = new Mail(from, subject, to, content);
+      const request = sg.emptyRequest({
+        method: 'POST',
+        path: '/v3/mail/send',
+        body: email.toJSON()
+      })
+      sg.API(request, (err) => {
+        if(!err) return
+        send(`There was an error sending your email. Please reconfigure email settings.`)
+      })
     }
   } else {
     return;
