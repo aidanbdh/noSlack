@@ -138,7 +138,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function({ text, channel, user }) {
     } else {
       const to = new Email(`${botData.contact.email}`)
       const subject = `New Slack Message.`;
-      const content = new Content('text/plain', text.slice(botData.id.length + 4, text.length));
+      const content = new Content('text/plain', `${text.slice(botData.id.length + 4, text.length)} + Join the conversation at https://${botData.contact.team}.slack.com`);
       const email = new Mail(from, subject, to, content);
       const request = sg.emptyRequest({
         method: 'POST',
